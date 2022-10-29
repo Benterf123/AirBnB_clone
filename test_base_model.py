@@ -8,7 +8,8 @@ print(my_model)
 my_model.save()
 print(my_model)
 my_model_json = my_model.to_dict()
-print(my_model_json)
+f = my_model_json
+print(f)
 print("JSON of my_model:")
-for key in my_model_json.keys():
-    print("\t{}: ({}) - {}".format(key, type(my_model_json[key]), my_model_json[key]))
+for key in f.keys():
+    print("\t{}: ({}) - {}".format(key, type(f[key]), f[key]))
