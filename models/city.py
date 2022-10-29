@@ -1,11 +1,9 @@
 #!/usr/bin/python3
-"""
-Defines city
-"""
+"""Contains the City model"""
 from models.base_model import BaseModel
 
 
 class City(BaseModel):
-    """defines city to look for"""
+    """Implements the City class"""
     state_id = ""
     name = ""
