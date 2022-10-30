@@ -13,7 +13,6 @@ class BaseModel:
             # self.__dict__ = kwargs
             # self.created_at = datetime.strptime(self.created_at,
             #                                     "%Y-%m-%dT%H:%M:%S.%f")
-
             # self.updated_at = datetime.strptime(self.updated_at,
             #                                     "%Y-%m-%dT%H:%M:%S.%f")
             for key, value in kwargs.items():
@@ -47,7 +46,3 @@ class BaseModel:
         dict_copy["updated_at"] = self.updated_at.isoformat()
         dict_copy['__class__'] = self.__class__.__name__
         return dict_copy
-
-    # @property
-    # def id(self):
-    #     return self.id
