@@ -1,112 +1,213 @@
 #!/usr/bin/python3
 """
-Contains the TestFileStorageDocs classes
+    This module contains test cases for FileStorage
 """
-
-from datetime import datetime
-import inspect
-from models.engine import file_storage
-from models.amenity import Amenity
-from models.base_model import BaseModel
-from models.city import City
-from models.place import Place
-from models.review import Review
-from models.state import State
-from models.user import User
 import json
 import os
-import pep8
 import unittest
-FileStorage = file_storage.FileStorage
-classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
-           "Place": Place, "Review": Review, "State": State, "User": User}
-
-
-class TestFileStorageDocs(unittest.TestCase):
-    """Tests to check the documentation and style of FileStorage class"""
-    @classmethod
-    def setUpClass(cls):
-        """Set up for the doc tests"""
-        cls.fs_f = inspect.getmembers(FileStorage, inspect.isfunction)
-
-    def test_pep8_conformance_file_storage(self):
-        """Test that models/engine/file_storage.py conforms to PEP8."""
-        pep8s = pep8.StyleGuide(quiet=True)
-        result = pep8s.check_files(['models/engine/file_storage.py'])
-        self.assertEqual(result.total_errors, 0,
-                         "Found code style errors (and warnings).")
-
-    def test_pep8_conformance_test_file_storage(self):
-        """Test tests/test_models/test_file_storage.py conforms to PEP8."""
-        pep8s = pep8.StyleGuide(quiet=True)
-        result = pep8s.check_files(['tests/test_models/test_engine/\
-test_file_storage.py'])
-        self.assertEqual(result.total_errors, 0,
-                         "Found code style errors (and warnings).")
-
-    def test_file_storage_module_docstring(self):
-        """Test for the file_storage.py module docstring"""
-        self.assertIsNot(file_storage.__doc__, None,
-                         "file_storage.py needs a docstring")
-        self.assertTrue(len(file_storage.__doc__) >= 1,
-                        "file_storage.py needs a docstring")
-
-    def test_file_storage_class_docstring(self):
-        """Test for the FileStorage class docstring"""
-        self.assertIsNot(FileStorage.__doc__, None,
-                         "State class needs a docstring")
-        self.assertTrue(len(FileStorage.__doc__) >= 1,
-                        "State class needs a docstring")
-
-    def test_fs_func_docstrings(self):
-        """Test for the presence of docstrings in FileStorage methods"""
-        for func in self.fs_f:
-            self.assertIsNot(func[1].__doc__, None,
-                             "{:s} method needs a docstring".format(func[0]))
-            self.assertTrue(len(func[1].__doc__) >= 1,
-                            "{:s} method needs a docstring".format(func[0]))
+from models import storage
+from models.base_model import BaseModel
+from models.engine.file_storage import FileStorage
 
 
 class TestFileStorage(unittest.TestCase):
-    """Test the FileStorage class"""
-    def test_all_returns_dict(self):
-        """Test that all returns the FileStorage.__objects attr"""
-        storage = FileStorage()
-        new_dict = storage.all()
-        self.assertEqual(type(new_dict), dict)
-        self.assertIs(new_dict, storage._FileStorage__objects)
+    """" Test cases class for FileStorage """
 
-    def test_new(self):
-        """test that new adds an object to the FileStorage.__objects attr"""
-        storage = FileStorage()
-        save = FileStorage._FileStorage__objects
-        FileStorage._FileStorage__objects = {}
-        test_dict = {}
-        for key, value in classes.items():
-            with self.subTest(key=key, value=value):
-                instance = value()
-                instance_key = instance.__class__.__name__ + "." + instance.id
-                storage.new(instance)
-                test_dict[instance_key] = instance
-                self.assertEqual(test_dict, storage._FileStorage__objects)
-        FileStorage._FileStorage__objects = save
+    def setUp(self):
+        """ Setup function for TestFileStorage """
+        super().setUp()
+        self.file_path = 'file.json'
 
-    def test_save(self):
-        """Test that save properly saves objects to file.json"""
-        os.remove("file.json")
-        storage = FileStorage()
-        new_dict = {}
-        for key, value in classes.items():
-            instance = value()
-            instance_key = instance.__class__.__name__ + "." + instance.id
-            new_dict[instance_key] = instance
-        save = FileStorage._FileStorage__objects
-        FileStorage._FileStorage__objects = new_dict
+    def test_pep8_base_model(self):
+        """pep8 test.
+        Makes sure the Python code is up to the pep8 standard.
+        """
+        syntax = pep8.StyleGuide(quit=True)
+        check = syntax.check_files(['models/base_model.py'])
+        self.assertEqual(
+            check.total_errors, 0,
+            "Found code style errors (and warnings)."
+        )
+
+    def test_instance_creation(self):
+        """ Test for FfileStorage instance creation """
+        my_storage = FileStorage()
+        self.assertIs(type(my_storage), FileStorage)
+
+    def test_method_all(self):
+        """ Test method 'all' of storage """
+        all = storage.all()
+        empty_dict = dict()
+
+        if os.path.exists(self.file_path):
+            self.assertNotEqual(all, empty_dict)
+        else:
+            self.assertDictEqual(all, empty_dict)
+
+    def test_method_all_with_one_param(self):
+        """ Tests for method 'all' with one param """
+
+        regex = 'takes 1 positional argument but 2 were given'
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.all(None)
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.all([])
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.all([1, 2, 3])
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.all({})
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.all({1, 2, 3})
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.all(True)
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.all(False)
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.all(dict())
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.all({'id': 123})
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.all('Ranmod value')
+
+    def test_method_new(self):
+        """ Test that 'new' method stores an object correctly """
+        obj = BaseModel()
+        key = "{}.{}".format(type(obj).__name__, obj.id)
+
+        all_objs = storage.all()
+        storage.new(obj)
+
+        self.assertEqual(obj, all_objs[key])
+
+    def test_method_new_with_one_param(self):
+        """ Tests for method 'new' with one param different than expected """
+
+        regex = "object has no attribute 'id'"
+        with self.assertRaisesRegex(AttributeError, regex):
+            storage.new(None)
+        with self.assertRaisesRegex(AttributeError, regex):
+            storage.new([])
+        with self.assertRaisesRegex(AttributeError, regex):
+            storage.new([1, 2, 3])
+        with self.assertRaisesRegex(AttributeError, regex):
+            storage.new({})
+        with self.assertRaisesRegex(AttributeError, regex):
+            storage.new({1, 2, 3})
+        with self.assertRaisesRegex(AttributeError, regex):
+            storage.new(True)
+        with self.assertRaisesRegex(AttributeError, regex):
+            storage.new(False)
+        with self.assertRaisesRegex(AttributeError, regex):
+            storage.new(dict())
+        with self.assertRaisesRegex(AttributeError, regex):
+            storage.new({'id': 123})
+        with self.assertRaisesRegex(AttributeError, regex):
+            storage.new('Ranmod value')
+
+    def test_method_new_with_two_params(self):
+        """ Test 'new' method with two positional args """
+        obj = BaseModel()
+
+        regex = 'takes 2 positional arguments but 3 were given'
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.new(obj, None)
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.new(obj, [])
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.new(obj, [1, 2, 3])
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.new(obj, {})
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.new(obj, {1, 2, 3})
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.new(obj, True)
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.new(obj, False)
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.new(obj, dict())
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.new(obj, {'id': 123})
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.new(obj, 'Ranmod value')
+
+    def test_save_method(self):
+        """ Tests for 'save' method """
+        prev_all_objs = storage.all()
+
+        obj = BaseModel()
+        key = "{}.{}".format(type(obj).__name__, obj.id)
+
+        self.assertIn(key, prev_all_objs.keys())
+
+        with open('file.json', mode='r', encoding='utf-8') as file:
+            dict_loaded = json.load(file)
+
+            self.assertIs(type(dict_loaded), dict)
+            self.assertNotIn(key, dict_loaded.keys())
+
         storage.save()
-        FileStorage._FileStorage__objects = save
-        for key, value in new_dict.items():
-            new_dict[key] = value.to_dict()
-        string = json.dumps(new_dict)
-        with open("file.json", "r") as f:
-            js = f.read()
-        self.assertEqual(json.loads(string), json.loads(js))
+
+        with open('file.json', mode='r', encoding='utf-8') as file:
+            dict_loaded = json.load(file)
+
+            self.assertIs(type(dict_loaded), dict)
+            self.assertIn(key, dict_loaded.keys())
+
+    def test_save_method_with_one_param(self):
+        """ Test for 'save' method with one param """
+        regex = 'takes 1 positional argument but 2 were given'
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.save(None)
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.save([])
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.save([1, 2, 3])
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.save({})
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.save({1, 2, 3})
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.save(True)
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.save(False)
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.save(dict())
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.save({'id': 123})
+        with self.assertRaisesRegex(TypeError, regex):
+            storage.save('Ranmod value')
+
+    def test_reload_method(self):
+        """ Test cases for 'reload' method """
+        prev_dict = storage.all()
+
+        storage.reload()
+
+        self.assertDictEqual(prev_dict, storage.all())
+
+    def test_reload_method_with_one_param(self):
+        """ Tests for reload method passing one param """
+        with self.assertRaises(TypeError):
+            storage.reload(None)
+        with self.assertRaises(TypeError):
+            storage.reload([])
+        with self.assertRaises(TypeError):
+            storage.reload([1, 2, 3])
+        with self.assertRaises(TypeError):
+            storage.reload({})
+        with self.assertRaises(TypeError):
+            storage.reload({1, 2, 3})
+        with self.assertRaises(TypeError):
+            storage.reload(True)
+        with self.assertRaises(TypeError):
+            storage.reload(False)
+        with self.assertRaises(TypeError):
+            storage.reload(dict())
+        with self.assertRaises(TypeError):
+            storage.reload({'id': 123})
+        with self.assertRaises(TypeError):
+            storage.reload('Ranmod value')
+
+
+if __name__ == '__main__':
+    unittest.main()

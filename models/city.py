@@ -1,10 +1,9 @@
 #!/usr/bin/python3
-"""City Module for AirBnB project."""
+""" class City """
 from models.base_model import BaseModel
 
 
 class City(BaseModel):
-    """City class that describes a city."""
-
+    """attributes of City """
     state_id = ""
     name = ""
