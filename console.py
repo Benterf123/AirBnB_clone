@@ -42,7 +42,6 @@ class HBNBCommand(cmd.Cmd):
             new_instance = eval(arg)()
             new_instance.save()
             print(new_instance.id)
-
     def do_show(self, arg):
         """Prints the string representation of an instance"""
         tokens = arg.split()
@@ -140,10 +139,11 @@ class HBNBCommand(cmd.Cmd):
 
         if arg in self.my_classes:
             class_for_search = arg
-            for key, value in al_objects.items():
-                if class_for_serch in key:
-                    all_list.apend(str(value))
-        print(len(all_list)
+            for key, value in all_objects.items():
+                if class_for_search in key:
+                    all_list.append(str(value))
+        print(len(all_list))
+
 
 
     def __update_from_dict(self, dct):
@@ -166,10 +166,13 @@ class HBNBCommand(cmd.Cmd):
                 for attr, value in dct.items():
                     if attr not in forbiden_update:
                         obj = storage.all()[key]
-                        if attr in obj.__dict__:
-                            value = type(obj.__dict__[attr])(value)
-                        obj.__setattr__(attr, value)
-                        storage.save()
+                        if attr in obj.__dict__
+
+                            value = type(obj._dict__[attr])(value)
+
+                        obj.__setattr__(attr,value)
+
+                        storage.save(
 
     def default(self, line):
         """Method called on an input line when the command prefix
@@ -199,14 +202,22 @@ class HBNBCommand(cmd.Cmd):
                         dct = params[-1]
                         dct['id'] = params[0]
                         dct['class'] = args[0]
-                        return self.__update_from_dict(dct)
-                    else:
-                        pattern = r'\(.*\)$'
-                        match = re.search(pattern=pattern, string=text_args)
-                        if match:
-                            txt_args = str(match.group())
-                            txt_args = txt_args[1:-1].replace(',', ' ')
-                            txt_args = "{} {}".format(args[0], txt_args)
+
+                        return self.__updatefrom_dict(dct)
+
+                    else
+
+                    pattern = r'\(.*\)$'
+
+                    match = re.search(pattern=pattern, string=text_args)
+
+                    if match:
+
+                        txt_args = str(match.group())
+
+                        txt_args = txt_args[1:-1].replace(',', ' ')
+
+                        txt_args = "{} {}".format(args[0], txt_args)
                             return actions[action](txt_args)
 
         return super().default(line)
